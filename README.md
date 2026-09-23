@@ -35,21 +35,21 @@ A porta `5173` precisa ser a mesma liberada no CORS do backend.
 
 ## Como o download funciona
 
-1. O botão chama `exportarProdutosCsv(categoria)`, passando o filtro atual da tela
-2. O `fetch` faz a requisição para `/produtos/export`
-3. A resposta é lida como **Blob** (`resposta.blob()`)
+1. O botão chama `exportProductsCsv(category)`, passando o filtro atual da tela
+2. O `fetch` faz a requisição para `/products/export`
+3. A resposta é lida como **Blob** (`response.blob()`)
 4. O nome do arquivo é extraído do header `Content-Disposition`
-5. O `baixarBlob` cria uma URL temporária (`URL.createObjectURL`), simula o clique num `<a download>` invisível e depois libera a memória (`URL.revokeObjectURL`)
+5. O `downloadBlob` cria uma URL temporária (`URL.createObjectURL`), simula o clique num `<a download>` invisível e depois libera a memória (`URL.revokeObjectURL`)
 
-**Por que `fetch` + Blob, e não um link direto?** Um `<a href="/produtos/export">` também baixaria o arquivo, mas não permite enviar headers. Com `fetch` dá para mandar `Authorization: Bearer <token>` em sistemas com login, mostrar "Exportando..." e tratar erros.
+**Por que `fetch` + Blob, e não um link direto?** Um `<a href="/products/export">` também baixaria o arquivo, mas não permite enviar headers. Com `fetch` dá para mandar `Authorization: Bearer <token>` em sistemas com login, mostrar "Exportando..." e tratar erros.
 
 **Atenção ao CORS:** o navegador esconde do JavaScript os headers de respostas de outra origem. O backend precisa expor o `Content-Disposition` (`exposedHeaders`), senão `resposta.headers.get('Content-Disposition')` retorna `null`.
 
 ## Anotações de estudo
 
-- **O JSON não tem tipo de data:** o `criadoEm` chega como string ISO, por isso é `string` no tipo `Produto`
-- **O `fetch` não lança erro para status 4xx/5xx**, só para falha de rede. É preciso checar o `resposta.ok`
+- **O JSON não tem tipo de data:** o `createdAt` chega como string ISO, por isso é `string` no tipo `Product`
+- **O `fetch` não lança erro para status 4xx/5xx**, só para falha de rede. É preciso checar o `response.ok`
 - **`URLSearchParams`** monta a query string e codifica os acentos automaticamente
-- **Race condition no `useEffect`:** a flag `ignorar` no cleanup descarta a resposta de uma requisição antiga quando o filtro muda rápido
-- **`setState` no evento, não no effect:** o `setCarregando(true)` fica no `mudarCategoria`, seguindo as regras de lint do React
+- **Race condition no `useEffect`:** a flag `ignore` no cleanup descarta a resposta de uma requisição antiga quando o filtro muda rápido
+- **`setState` no evento, não no effect:** o `setLoading(true)` fica no `changeCategory`, seguindo as regras de lint do React
 - **Duas requisições em desenvolvimento:** é o `StrictMode` do React montando o componente duas vezes de propósito; em produção não acontece
